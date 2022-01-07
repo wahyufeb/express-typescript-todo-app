@@ -1,6 +1,6 @@
 import { Response } from "express";
 
-export type IResponseFormatter  = {
+type IResponseFormatter  = {
   response: Response;
   code: number;
   message: string;

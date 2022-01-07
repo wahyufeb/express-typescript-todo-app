@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import IController from './ControllerInterface';
 import TodoService from '../services/TodoService';
-import ResponseFormatter, {IResponseFormatter} from '../utils/ResponseFormatter';
+import ResponseFormatter from '../utils/ResponseFormatter';
 
 class TodoController implements IController {
 	index = async (req: Request, res: Response): Promise<Response> => {
@@ -81,11 +81,12 @@ class TodoController implements IController {
 				})
 			}
 
+			const todo = await service.getOne();
 			return ResponseFormatter.formatResponse({
 				response: res,
 				code: 200,
 				message: 'Success updating todo',
-				data: updatingTodo,
+				data: todo,
 			})
 
 		} catch (error) {
@@ -114,7 +115,7 @@ class TodoController implements IController {
 				message: 'Success deleting todo',
 				data: null,
 			})
-			
+
 		} catch (error) {
 			console.log(error);
 			return res.json(error);

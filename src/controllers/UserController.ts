@@ -1,65 +1,117 @@
 import { Request, Response } from "express";
 import IController from "./ControllerInterface";
-
-let data: any[] = [
-  { id: 1, name: "Chatkamon" },
-  { id: 2, name: "Puimek" },
-  { id: 3, name: "Kwanrudee" },
-  { id: 4, name: "Namtarn" },
-]
+import UserService from "../services/UserService";
+import ResponseFormatter from "../utils/ResponseFormatter";
 
 class UserController implements IController {
-  index(req: Request, res: Response) :Response {
-    return res.json(data);
-  }
+  async index(req: Request, res: Response) :Promise<Response> {
+    try {
+      const service = new UserService(req)
+      const users = await service.getAll()
 
-  create(req: Request, res: Response) :Response {
-    const { name } = req.body;
-    data.push({ id:data.length + 1, name });
-
-    return res.json(data);
-  }
-
-  show(req: Request, res: Response) :Response {
-    const { id } = req.params;
-    const user = data.find((item) => item.id === Number(id));
-
-    if(!user) {
-      res.json("Id Tidak ditemukan");
+      return ResponseFormatter.formatResponse({
+        response: res,
+        code: 200,
+        message: 'Users data',
+        data: users,
+      })
+      
+    } catch (error) {
+			console.log(error);
+			return res.json(error);
     }
-
-    return res.json(user);
   }
 
-  update(req: Request, res: Response) :Response {
-    const { id } = req.params;
-    const { name } = req.body;
+  async create(req: Request, res: Response) :Promise<Response> {
+    try {
+      const service = new UserService(req)
+      const user = await service.save()
+  
+      return ResponseFormatter.formatResponse({
+        response: res,
+        code: 201,
+        message: 'User created',
+        data: user,
+      })
 
-    const user = data.find((item) => item.id === Number(id));
-    if(!user) {
-      return res.json("Id Tidak ditemukan");
+    } catch (error) {
+			console.log(error);
+			return res.json(error);
     }
-    user.name = name
-    return res.json({
-      message: "Berhasil diedit",
-      data: user
-    })
   }
 
-  delete(req: Request, res: Response) :Response {
-    const { id } = req.params;
-    const user = data.find((item) => item.id === Number(id));
-    if(!user) {
-      return res.json("Id Tidak ditemukan");
+  async show(req: Request, res: Response) :Promise<Response> {
+    try {
+      const service = new UserService(req)
+      const user = await service.getOne()
+  
+      return ResponseFormatter.formatResponse({
+        response: res,
+        code: 200,
+        message: 'Success get user',
+        data: user,
+      })
+
+    } catch (error) {
+			console.log(error);
+			return res.json(error);
     }
-
-    data = data.filter((item) => item.id !== Number(id))
-    return res.json({
-      message: "Berhasil dihapus",
-      data
-    })
   }
 
+  async update(req: Request, res: Response) :Promise<Response> {
+    try {
+      const service = new UserService(req)
+      const updatingUser = await service.update()
+
+      if (updatingUser === 0) {
+				return ResponseFormatter.formatResponse({
+					response: res,
+					code: 404,
+					message: 'Failed to update user',
+					data: null,
+				})
+			}
+
+      const user = await service.getOne()
+			return ResponseFormatter.formatResponse({
+				response: res,
+				code: 200,
+				message: 'Success updating user',
+        data: user,
+			})
+
+    } catch (error) {
+			console.log(error);
+			return res.json(error);
+    }
+  }
+
+  delete = async (req: Request, res: Response): Promise<Response> => {
+		try {
+			const service = new UserService(req);
+			const deletingUser = await service.delete();
+
+			if (deletingUser === 0) {
+				return ResponseFormatter.formatResponse({
+					response: res,
+					code: 404,
+					message: 'Failed to delete user',
+					data: null,
+				})
+			}
+
+			return ResponseFormatter.formatResponse({
+				response: res,
+				code: 200,
+				message: 'Success deleting user',
+				data: null,
+			})
+
+		} catch (error) {
+			console.log(error);
+			return res.json(error);
+		}
+	};
 }
 
 export default new UserController();

@@ -1,5 +1,6 @@
 import { Request } from "express";
 import { db } from "../db/models";
+import AuthenticationUtils from "../utils/AuthenticationUtils";
 
 class UserService {
   credentials: {
@@ -23,10 +24,15 @@ class UserService {
   }
 
   save = async () => {
+    const hashedPassword: string = await AuthenticationUtils.passwordHash(
+      this.body.password,
+    );
+    
     const user = await db.users.create({
       email: this.body.email,
       username: this.body.username,
       name: this.body.name,
+      password: hashedPassword,
     });
 
     return user;
