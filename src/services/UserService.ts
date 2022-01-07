@@ -21,6 +21,47 @@ class UserService {
 
     return users;
   }
+
+  save = async () => {
+    const user = await db.users.create({
+      email: this.body.email,
+      username: this.body.username,
+      name: this.body.name,
+    });
+
+    return user;
+  }
+
+  getOne = async () => {
+    const { id } = this.params;
+    const user = await db.users.findOne({
+      where: {
+        id,
+      },
+    });
+
+    return user;
+  }
+
+  update = async () => {
+    const { id } = this.params;
+    const { email, username, name } = this.body;
+    const updatingUser = await db.users.update(
+      { email, username, name },
+      { where: { id } },
+    );
+
+    return updatingUser;
+  }
+
+  delete = async () => {
+    const { id } = this.params;
+    const deletingUser = await db.users.destroy({
+      where: { id },
+    });
+
+    return deletingUser;
+  }
 }
 
 export default UserService;
